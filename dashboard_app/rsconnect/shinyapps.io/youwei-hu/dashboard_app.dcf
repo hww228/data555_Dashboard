@@ -1,0 +1,10 @@
+name: dashboard_app
+title:
+username: youwei-hu
+account: youwei-hu
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 17154494
+bundleId: 11881516
+url: https://youwei-hu.shinyapps.io/dashboard_app/
+version: 1
