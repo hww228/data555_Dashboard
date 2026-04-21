@@ -4,8 +4,4 @@
 .Ruserdata
 .DS_Store
 .Rproj.user
-docs/
-_site.yml
-about.Rmd
-dashboard_test.Rmd
-index.Rmd
+rsconnect/
