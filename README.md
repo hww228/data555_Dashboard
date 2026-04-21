@@ -8,13 +8,15 @@ An interactive Shiny dashboard for exploring quantitative EEG (QEEG) biomarkers 
 ---
 ## Dashboard Preview
 
-![Dashboard Preview](images/dashboard_preview.png)
+![Dashboard Preview](dashboard_app/images/dashboard_preview.png)
 ---
 
 ## Project Overview
 
 This project develops an interactive visualization tool to investigate EEG-derived biomarkers for early-stage Alzheimer's disease detection. The dashboard enables dynamic exploration of high-dimensional neurophysiological features, supporting both **group comparison** and **feature relationship analysis**.
 
+## Motivation
+Early detection of Alzheimer’s disease remains a major clinical challenge. This project aims to provide a data-driven, non-invasive tool for exploring EEG biomarkers that may improve diagnostic differentiation between MCI and AD.
 ---
 
 ## Key Features
@@ -50,17 +52,20 @@ This project develops an interactive visualization tool to investigate EEG-deriv
 ---
 
 ##  Project Structure
+```
 data555_Dashboard/
 ├── README.md
 ├── .gitignore
 ├── .nojekyll
 ├── DATA555_dashboard.Rproj
 └── dashboard_app/
-    ├── shiny_app.Rmd
+    ├── shiny_dashboard.Rmd
     ├── dashboard_style.css
+    ├── images/
+        └── dashboard_previwe.png
     └── data/
         └── patient_data.xlsx
-        
+```
 ---
 
 ## How to Run Locally
@@ -76,7 +81,5 @@ cd data555_Dashboard
 rmarkdown::run("dashboard_app/shiny_app.Rmd")
 ```
 
-## Motivation
-Early detection of Alzheimer’s disease remains a major clinical challenge. This project aims to provide a data-driven, non-invasive tool for exploring EEG biomarkers that may improve diagnostic differentiation between MCI and AD.
 
 
