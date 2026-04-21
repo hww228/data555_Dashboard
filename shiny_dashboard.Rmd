@@ -1,5 +1,5 @@
 ---
-title: "Data555 Dashboard"
+title: "EEG Biomarker Dashboard: MCI vs Alzheimers Disease"
 author: "Youwei Hu"
 date: "2026-03-06"
 output:
@@ -8,6 +8,9 @@ output:
     vertical_layout: fill
     social: menu
     source_code: embed
+    css: dashboard_style.css
+    navbar:
+      - { title: "GitHub", href: "https://github.com/hww228/data555_Dashboard", align: right, icon: "fa-github" }
 runtime: shiny
 ---
 
@@ -44,7 +47,7 @@ name_map <- tibble(
 # -----------------------------
 # Define feature families
 # -----------------------------
-# Adjust these lists if you want different grouping
+
 band_power_abs <- c("delta_abs","theta_abs","alpha_abs","beta_abs")
 band_power_rel <- c("delta_rel","theta_rel","alpha_rel","beta_rel")
 
@@ -86,41 +89,41 @@ feature_family <- tibble(
 # Labels for cleaner display
 # -----------------------------
 simple_labels <- c(
-  "delta_abs" = "log10 absolute delta",
-  "theta_abs" = "log10 absolute theta",
-  "alpha_abs" = "log10 absolute alpha",
-  "beta_abs"  = "log10 absolute beta",
+  "delta_abs" = "log10 Absolute Delta Power (uV2/Hz)",
+  "theta_abs" = "log10 Absolute Theta Power (uV2/Hz)",
+  "alpha_abs" = "log10 Absolute Alpha Power (uV2/Hz)",
+  "beta_abs"  = "log10 Absolute Beta Power (uV2/Hz)",
 
-  "delta_rel" = "relative delta",
-  "theta_rel" = "relative theta",
-  "alpha_rel" = "relative alpha",
-  "beta_rel"  = "relative beta",
+  "delta_rel" = "Relative Delta Power",
+  "theta_rel" = "Relative Theta Power",
+  "alpha_rel" = "Relative Alpha Power",
+  "beta_rel"  = "Relative Beta Power",
 
-  "slow_delta_theta" = "log10 slow (delta + theta)",
-  "fast_alpha_beta"  = "log10 fast (alpha + beta)",
+  "slow_delta_theta" = "log10 Slow Band Power (Delta + Theta)",
+  "fast_alpha_beta"  = "log10 Fast Band Power (Alpha + Beta)",
 
-  "delta_alpha" = "delta/alpha ratio",
-  "theta_alpha_delta" = "(theta + alpha)/delta",
-  "delta_alpha_beta" = "delta/(alpha + beta)",
-  "delta_theta_alpha_beta" = "(delta + theta)/(alpha + beta) ratio",
+  "delta_alpha" = "Delta / Alpha Ratio",
+  "theta_alpha_delta" = "(Theta + Alpha) / Delta Ratio",
+  "delta_alpha_beta" = "Delta / (Alpha + Beta) Ratio",
+  "delta_theta_alpha_beta" = "(Delta + Theta) / (Alpha + Beta) Ratio",
 
-  "wc_global" = "global wavelet coherence",
-  "wc_delta" = "delta wavelet coherence",
-  "wc_theta" = "theta wavelet coherence",
-  "wc_alpha" = "alpha wavelet coherence",
-  "wc_beta" = "beta wavelet coherence",
+  "wc_global" = "Global Wavelet Coherence",
+  "wc_delta" = "Delta Wavelet Coherence",
+  "wc_theta" = "Theta Wavelet Coherence",
+  "wc_alpha" = "Alpha Wavelet Coherence",
+  "wc_beta" = "Beta Wavelet Coherence",
 
-  "global_energy" = "global wavelet energy",
-  "rel_delta_ene" = "relative delta energy",
-  "rel_theta_ene" = "relative theta energy",
-  "rel_alpha_ene" = "relative alpha energy",
-  "rel_beta_ene" = "relative beta energy",
+  "global_energy" = "Global Wavelet Energy",
+  "rel_delta_ene" = "Relative Delta Wavelet Energy",
+  "rel_theta_ene" = "Relative Theta Wavelet Energy",
+  "rel_alpha_ene" = "Relative Alpha Wavelet Energy",
+  "rel_beta_ene"  = "Relative Beta Wavelet Energy",
 
-  "complexity_total" = "global complexity",
-  "c_delta" = "delta complexity",
-  "c_theta" = "theta complexity",
-  "c_alpha" = "alpha complexity",
-  "c_beta" = "beta complexity"
+  "complexity_total"       = "Global EEG Complexity",
+  "c_delta"                = "Delta Band Complexity",
+  "c_theta"                = "Theta Band Complexity",
+  "c_alpha"                = "Alpha Band Complexity",
+  "c_beta"                 = "Beta Band Complexity"
 )
 
 log_features <- c(
@@ -285,8 +288,8 @@ renderPlotly({
         "Diagnosis: ", diagnosis, "<br>",
         "Gender: ", gender, "<br>",
         "Age: ", age, "<br>",
-        "Raw value: ", round(raw_value, 4), "<br>",
-        "Displayed value: ", round(value_plot, 4)
+        "Raw value: ", round(raw_value, 3), "<br>",
+        "Displayed value: ", round(value_plot, 3)
       )
     )
   ) +
@@ -305,35 +308,42 @@ renderPlotly({
         )
       }
     } +
-    scale_fill_manual(values = c("MCI" = "#2C7BB6", "AD"  = "#D7191C")) +
+    scale_fill_manual(values = c("MCI" = "#2C7BB6", "AD"  = "#D7191C"),
+                      labels = c("MCI" = "Mild Cognitive Impairment (MCI)",
+                                 "AD"  = "Alzheimer's Disease (AD)")) +
     labs(
       x = NULL,
       y = y_lab,
       fill = NULL
     ) +
-    theme_bw(base_size = 13) +
+    theme_bw(base_size = 14) +
     theme(
       legend.position = "bottom",
       panel.grid.major.x = element_blank(),
       panel.grid.minor = element_blank(),
       axis.text = element_text(size = 14),
-      axis.title = element_text(size = 15),
+      axis.title.x  = element_text(size = 14, margin = margin(t = 8)),
+      axis.title.y  = element_text(size = 13),
       plot.title = element_text(face = "bold", size = 16, hjust = 0.5),
       plot.subtitle = element_text(size = 11)
     )
-
   
+  p_label <- if (is.na(p_val)) {
+    "p-value: N/A"
+  } else if (p_val < 0.001) {
+    "Wilcoxon p < 0.001"
+  } else {
+    paste0("Wilcoxon p = ", signif(p_val, 3))
+  }
+
   ggplotly(p, tooltip = "text", height = 550) %>%
   layout(
-    boxmode = "group",
     title = list(
       text = paste0(
-        "Distribution of ", feature_label, " by Diagnosis",
-        "<br><span style='font-size:14px;'>Wilcoxon p-value: ",
-        ifelse(is.na(p_val), "NA", signif(p_val, 3)),
-        "</sup>"
-      ),
-      x = 0.5
+        "Distribution of ", feature_label, " by Diagnosis Group</b>",
+        "<br><span style='font-size:14px;color:#555;'>", p_label, "</span>"),
+      x = 0.5,
+      font = list(size = 16)
     ),
     margin = list(t = 120)
   )
@@ -344,9 +354,9 @@ renderPlotly({
 
 ### Key Takeaways from Boxplot {data-height="200"}
 
-These boxplots compare the distribution of one EEG biomarker at a time between patients with mild cognitive impairment (Group MCI) and Alzheimer's disease (Group AD) after filtering by age and gender. The boxplot and overlaid patient-level points make it easy to see whether the AD group has a higher center, wider spread, or more extreme values than the MCI group, while the tooltip helps the viewer inspect individual observations and outliers in detail.
+These boxplots compare the distribution of a single EEG biomarker between patients with **Mild Cognitive Impairment (MCI)** and **Alzheimer's Disease (AD)**, with optional filters for age and gender. The box shows the interquartile range (IQR), and the line marks the median. Hovering over any point or box reveals the patient ID, diagnosis, gender, age, and the precise biomarker value — making it easy to inspect individual observations and outliers. The Wilcoxon rank-sum p-value beneath the title tests whether the two group distributions differ significantly.
 
-For absolute power and slow/fast power features, the displayed scale is `log10(value + 1)` so that highly skewed values remain readable. This makes group differences easier to compare visually while still preserving the original patient-level values in the tooltip.
+For absolute-power and slow/fast-band features, values are displayed on a log₁₀ scale to reduce skew; the original raw value is always available in the tooltip.
 
 # Correlation Explorer
 
@@ -376,10 +386,13 @@ selectInput(
 
 sliderInput(
   "age_range_corr",
-  "Age range for heatmap",
+  "Age Range (years)",
   min = floor(min(patient_result_clean$age, na.rm = TRUE)),
   max = ceiling(max(patient_result_clean$age, na.rm = TRUE)),
-  value = c(floor(min(patient_result_clean$age, na.rm = TRUE)), ceiling(max(patient_result_clean$age, na.rm = TRUE))),
+  value = c(
+    floor(min(patient_result_clean$age, na.rm = TRUE)),
+    ceiling(max(patient_result_clean$age, na.rm = TRUE))
+    ),
   step = 1
 )
 
@@ -434,10 +447,9 @@ renderPlotly({
   )
   
   C <- make_corr(corr_data(), feats, method = input$corr_method)
-
   validate(
     need(!is.null(C), "Not enough valid features/data to compute correlations."),
-    need(nrow(C) >= 2 && ncol(C) >= 2, "Need at least two valid features to draw the heatmap.")
+    need(nrow(C) >= 2 && ncol(C) >= 2, "Need at least two valid features.")
   )
   
   
@@ -465,17 +477,19 @@ renderPlotly({
     type = "heatmap",
     source = "heatmap_click",
     hovertemplate = paste0(
-      "Feature X: %{x}<br>",
-      "Feature Y: %{y}<br>",
-      "Correlation: %{z:.3f}<extra></extra>"
-    )
+      "<b>Biomarker X:</b> %{x}<br>",
+      "<b>Biomarker Y:</b> %{y}<br>",
+      "<b>Correlation (", input$corr_method, "):</b> %{z:.3f}",
+      "<extra></extra>")
   ) %>%
     layout(
       title = paste0(
         "Correlation Heatmap (", input$corr_method,
         "), showing |r| ≥ ", input$corr_thr
       ),
-      xaxis = list(title = "", tickangle = 45),
+      xaxis = list(
+        title = list(text = "EEG Biomarker", font = list(size = 13)), 
+        tickangle = 45),
       yaxis = list(title = "")
     )
 })
@@ -485,6 +499,28 @@ renderPlotly({
 
 ### Key takeaways from correlation heatmap {data-height="200"}
 
-These correlation heatmap help identify clusters of biomarkers that move together and may therefore contain overlapping information. Strong positive or negative correlations suggest redundancy, while weaker correlations highlight features that may contribute unique information to downstream modeling or interpretation.
+This heatmap reveals clusters of EEG biomarkers that co-vary across patients. Strong positive correlations (blue) suggest redundant features that carry overlapping information; strong negative correlations (red) indicate features that move in opposite directions and may together capture complementary aspects of brain activity. Features with weak or no correlations are likely to contribute unique signal to any downstream classification or modeling task.
 
-The filters let the viewer test whether the correlation structure changes across diagnosis group, gender, age range, feature family, and correlation method. This supports deeper exploration by allowing the user to move from a broad overview of the full biomarker set to a focused view of only the strongest relationships.
+Use the filters to test whether the correlation structure changes across diagnosis group, gender, or age range — this can expose subgroup-specific patterns not visible in the full sample.
+
+
+# About the Data
+
+## Column
+
+### Dataset Description {data-height="400"}
+
+**Data Source:** Resting-state EEG recordings collected at the Goizueta Brain Health Institute at Emory University (data confidential; not publicly available).
+
+**Sample Size:** 31 participants clinically diagnosed with either Alzheimer's Disease (AD) or Mild Cognitive Impairment (MCI) based on standard neurological assessments .
+
+**Data Collection:** EEG signals were recorded under resting-state conditions — participants remained relaxed without performing any cognitive task. Signals were captured from 19 scalp electrodes (Fp1, Fp2, F3, F4, F7, F8, Fz, C3, C4, Cz, P3, P4, Pz, T3, T4, T5, T6, O1, O2) positioned according to the international 10–20 system, sampled at 256 Hz. Features extracted include spectral power, power ratios, wavelet coherence, wavelet energy, and complexity measures across the delta, theta, alpha, and beta frequency bands.
+
+**Study Population:** Adults diagnosed with AD or MCI, evaluated through standard neurological assessment at the Goizueta Brain Health Institute, Emory University.
+
+
+### Real-World Importance {data-height="200"}
+Early and objective differentiation between Mild Cognitive Impairment and Alzheimer's Disease is critical for timely clinical intervention, yet current diagnosis relies heavily on subjective assessments. This dashboard enables clinicians and researchers to interactively explore which resting-state EEG biomarkers most reliably distinguish MCI from AD, supporting the development of accessible, non-invasive neurophysiological tools for earlier dementia detection.
+
+*[GitHub Repository](https://github.com/hww228/data555_Dashboard) — includes source code and a full README.*
+

@@ -1,0 +1,10 @@
+name: data555_dashborad
+title:
+username: youwei-hu
+account: youwei-hu
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 17154435
+bundleId:
+url: https://youwei-hu.shinyapps.io/data555_dashborad/
+version: 1
